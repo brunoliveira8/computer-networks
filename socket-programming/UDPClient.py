@@ -1,16 +1,31 @@
+''' UDPClient.py
+usage: python UDPClient.py HOSTNAMEorIP PORT
+Reads text from user, sends to server, and prints answer
+Modified by Dale R. Thompson, 2/10/15
+'''
+
+import sys
+
+# Import socket library
 from socket import *
 
-serverName = "turing.uark.edu"
+# Set hostname or IP address from command line
+serverName = sys.argv[1]
 
-serverPort = 12000
+# Set port number by converting argument string to integer
+serverPort = int(sys.argv[2])
 
+# Choose SOCK_DGRAM, which is UDP
 clientSocket = socket(AF_INET, SOCK_DGRAM)
 
-message = raw_input("Input lowercase sentence: ")
+# Get message from user
+message = raw_input('Input lowercase sentence: ')
 
-clientSocket.sendto(message, (serverName, serverPort))
+# Create UDP segment with message, hostname/IP, and port. Send it
+clientSocket.sendto(message,(serverName, serverPort))
 
-modifiedMessage, serverAdress = clientSocket.recvfrom(2048)
+# Wait for segment from server
+modifiedMessage, serverAddress = clientSocket.recvfrom(2048)
 
 print modifiedMessage
 
