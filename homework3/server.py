@@ -12,7 +12,7 @@ from socket import *
 
 # Set port number by converting argument string to integer
 #serverPort = int(sys.argv[1])
-serverPort = 7087
+serverPort = 7081
 
 # Choose SOCK_STREAM, which is TCP
 # This is a welcome socket
@@ -39,45 +39,67 @@ letters = {"A": "_", "R": "_","K": "_","N": "_","S": "_"}
 
 word = '{0} {1} {2} {0} {3} {4} {0} {4}'.format(letters["A"],letters["R"],letters["K"],letters["N"],letters["S"])
 
-message = "null"
-
 countMistakes = -1
+
+result = 'Game continues'
 
 print "The server is ready to receive"
 
+
+
 # Forever, read in sentence, convert to uppercase, and send
 while 1:
+
+
   # Wait for connection and create a new socket
   # It blocks here waiting for connection
   connectionSocket, addr = serverSocket.accept()
+ 
+  while result == 'Game continues':
+      # Read bytes from socket
+      sentence = connectionSocket.recv(1024)
 
-  # Read bytes from socket
-  sentence = connectionSocket.recv(1024)
+      # Convert sentence to uppercase
+      capitalizedSentence = sentence.upper()
 
+      if len(sentence) >= 8:
+        if sentence == secretWord:
+          result = "You won!"
+          
+
+        else:
+          result = "You lost!"
+
+
+      else:
+          if secretWord.find(capitalizedSentence[0]) == -1:
+            countMistakes = countMistakes + 1
+            print countMistakes
+          else:
+            letters[capitalizedSentence] = capitalizedSentence
+            word = '{0} {1} {2} {0} {3} {4} {0} {4}'.format(letters["A"],letters["R"],letters["K"],letters["N"],letters["S"])
+
+          if "_" not in letters.values():
+            result = "You won!"
+
+          elif countMistakes == 6:
+            result = "You lost!"
+          else:
+            result = "Game continues"
+
+          message = '{0} \n{1} \n{2}'.format(hangWord[countMistakes], word, result)
+      
+      # Send it into established connection
+      connectionSocket.send(message)
   
-  # Convert sentence to uppercase
-  capitalizedSentence = sentence.upper()
+  # Close connection to client but do not close welcome socket 
 
-  if len(sentence) >= 8:
-    if sentence == secretWord:
-      message = "You won!"
-
-    else:
-      message = "You lost!"
-
-
-  if secretWord.find(capitalizedSentence[0]) == -1:
-    countMistakes = countMistakes + 1
-  else:
-    letters[capitalizedSentence] = capitalizedSentence
-    word = '{0} {1} {2} {0} {3} {4} {0} {4}'.format(letters["A"],letters["R"],letters["K"],letters["N"],letters["S"])
-
-  message = '{0}\n{1}'.format(hangWord[countMistakes], word)
-  # Send it into established connection
-  connectionSocket.send(message)
-  
-  # Close connection to client but do not close welcome socket
   connectionSocket.close()
+  hangWord = ["H", "HA", "HAN", "HANG", "HANGM", "HANGMA", "HANGMAN"];
+  letters = {"A": "_", "R": "_","K": "_","N": "_","S": "_"}
+  word = '{0} {1} {2} {0} {3} {4} {0} {4}'.format(letters["A"],letters["R"],letters["K"],letters["N"],letters["S"])
+  countMistakes = -1
+  result = 'Game continues'
 
 serverSocket.close()
 
