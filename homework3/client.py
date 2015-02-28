@@ -1,4 +1,4 @@
-''' TCPClient.py
+''' client.py
 usage: python TCPClient.py HOSTNAMEorIP PORT
 Reads text from user, sends to server, and prints answer
 Modified by Dale R. Thompson, 2/10/15
@@ -10,11 +10,12 @@ import sys
 from socket import *
 
 # Set hostname or IP address from command line
-serverName = sys.argv[1]
+#serverName = sys.argv[1]
+serverName = 'localhost'
 
 # Set port number by converting argument string to integer
-serverPort = int(sys.argv[2])
-
+#serverPort = int(sys.argv[2])
+serverPort = 7087
 # Choose SOCK_STREAM, which is TCP
 clientSocket = socket(AF_INET, SOCK_STREAM)
 

@@ -1,4 +1,4 @@
-''' TCPServer.py
+''' server.py
 usage: python TCPServer.py PORT
 Reads in text, changes all letters to uppercase, and returns
 the text to the client
@@ -11,17 +11,37 @@ import sys
 from socket import *
 
 # Set port number by converting argument string to integer
-serverPort = int(sys.argv[1])
+#serverPort = int(sys.argv[1])
+serverPort = 7087
 
 # Choose SOCK_STREAM, which is TCP
 # This is a welcome socket
-serverSocket = socket(AF_INET, SOCK_STREAM)
+try:
+    #create an AF_INET, STREAM socket (TCP)
+    serverSocket = socket(AF_INET, SOCK_STREAM)
+except socket.error, msg:
+    print 'Failed to create socket. Error code: ' + str(msg[0]) + ' , Error message : ' + msg[1]
+    sys.exit();
+
 
 # Start listening on specified port
 serverSocket.bind(('', serverPort))
 
 # Listener begins listening
 serverSocket.listen(1)
+
+#HANGMAN VARIABLE
+secretWord = "ARKANSAS"
+
+hangWord = ["H", "HA", "HAN", "HANG", "HANGM", "HANGMA", "HANGMAN"];
+
+letters = {"A": "_", "R": "_","K": "_","N": "_","S": "_"}
+
+word = '{0} {1} {2} {0} {3} {4} {0} {4}'.format(letters["A"],letters["R"],letters["K"],letters["N"],letters["S"])
+
+message = "null"
+
+countMistakes = -1
 
 print "The server is ready to receive"
 
@@ -33,12 +53,34 @@ while 1:
 
   # Read bytes from socket
   sentence = connectionSocket.recv(1024)
+
   
   # Convert sentence to uppercase
   capitalizedSentence = sentence.upper()
-  
+
+  if len(sentence) >= 8:
+    if sentence == secretWord:
+      message = "You won!"
+
+    else:
+      message = "You lost!"
+
+
+  if secretWord.find(capitalizedSentence[0]) == -1:
+    countMistakes = countMistakes + 1
+  else:
+    letters[capitalizedSentence] = capitalizedSentence
+    word = '{0} {1} {2} {0} {3} {4} {0} {4}'.format(letters["A"],letters["R"],letters["K"],letters["N"],letters["S"])
+
+  message = '{0}\n{1}'.format(hangWord[countMistakes], word)
   # Send it into established connection
-  connectionSocket.send(capitalizedSentence)
+  connectionSocket.send(message)
   
   # Close connection to client but do not close welcome socket
   connectionSocket.close()
+
+serverSocket.close()
+
+
+
+
