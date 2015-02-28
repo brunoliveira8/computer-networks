@@ -32,20 +32,13 @@ serverSocket.listen(1)
 
 #HANGMAN VARIABLE
 secretWord = "ARKANSAS"
-
-hangWord = ["H", "HA", "HAN", "HANG", "HANGM", "HANGMA", "HANGMAN"];
-
+hangWord = ["H", "HA", "HAN", "HANG", "HANGM", "HANGMA", "HANGMAN", " "];
 letters = {"A": "_", "R": "_","K": "_","N": "_","S": "_"}
-
 word = '{0} {1} {2} {0} {3} {4} {0} {4}'.format(letters["A"],letters["R"],letters["K"],letters["N"],letters["S"])
-
 countMistakes = -1
-
 result = 'Game continues'
 
 print "The server is ready to receive"
-
-
 
 # Forever, read in sentence, convert to uppercase, and send
 while 1:
@@ -63,12 +56,16 @@ while 1:
       capitalizedSentence = sentence.upper()
 
       if len(sentence) >= 8:
-        if sentence == secretWord:
+        if capitalizedSentence == secretWord:
           result = "You won!"
-          
-
+          for key in letters.keys():
+            letters[key] = key   
+            word = '{0} {1} {2} {0} {3} {4} {0} {4}'.format(letters["A"],letters["R"],letters["K"],letters["N"],letters["S"])
+            if countMistakes == -1:
+              countMistakes = 7       
         else:
           result = "You lost!"
+          countMistakes = 6
 
 
       else:
@@ -87,7 +84,7 @@ while 1:
           else:
             result = "Game continues"
 
-          message = '{0} \n{1} \n{2}'.format(hangWord[countMistakes], word, result)
+      message = '{0} \n{1} \n{2}'.format(hangWord[countMistakes], word, result)
       
       # Send it into established connection
       connectionSocket.send(message)

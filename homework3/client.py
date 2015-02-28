@@ -33,6 +33,10 @@ while 1:
 
 	# Get sentence from user
 	sentence = raw_input('Input lowercase sentence: ')
+	while(len(sentence) == 0): 
+		print 'Type a valid characther'
+		sentence = raw_input('Input lowercase sentence: ')
+		
 
 	# Send it into socket to server
 	clientSocket.send(sentence)
