@@ -1,9 +1,17 @@
-''' server.py
-usage: python TCPServer.py PORT
-Reads in text, changes all letters to uppercase, and returns
-the text to the client
-Modified by Dale R. Thompson, 2/10/15
-'''
+'''=============================================================================
+ |    File Name:  server.py
+ |
+ |       Author:  Tarcisio Bruno Carneiro Oliveira
+ |     Language:  Python 2.7
+ |       To Run:  python server.py
+ |
+ |        Class:  CSCE4753
+ |      Project:  HANGMAN
+ |   Assumption:  [any prerequisite or precondition that must be met]
+ | Date Created:  2-27-2015
+ |    
+ |
+ +==========================================================================='''
 
 import sys
 
@@ -11,8 +19,7 @@ import sys
 from socket import *
 
 # Set port number by converting argument string to integer
-#serverPort = int(sys.argv[1])
-serverPort = 7081
+serverPort = 5555
 
 # Choose SOCK_STREAM, which is TCP
 # This is a welcome socket
@@ -30,12 +37,15 @@ serverSocket.bind(('', serverPort))
 # Listener begins listening
 serverSocket.listen(1)
 
-#HANGMAN VARIABLE
+#HANGMAN VARIABLES
 secretWord = "ARKANSAS"
-hangWord = ["H", "HA", "HAN", "HANG", "HANGM", "HANGMA", "HANGMAN", " "];
+hangWord = [" ", "H", "HA", "HAN", "HANG", "HANGM", "HANGMA", "HANGMAN"];
 letters = {"A": "_", "R": "_","K": "_","N": "_","S": "_"}
+guessedLetters = []
+guessedLetters_msg = ''
+guessed_letter = False
 word = '{0} {1} {2} {0} {3} {4} {0} {4}'.format(letters["A"],letters["R"],letters["K"],letters["N"],letters["S"])
-countMistakes = -1
+countMistakes = 0
 result = 'Game continues'
 
 print "The server is ready to receive"
@@ -55,47 +65,69 @@ while 1:
       # Convert sentence to uppercase
       capitalizedSentence = sentence.upper()
 
+      #this variable verifies if the user has already type the letter to send a warning
+      guessed_letter = False
+
+      #Verifies if the user tried to guess the all word.
       if len(sentence) >= 8:
         if capitalizedSentence == secretWord:
           result = "You won!"
+          
           for key in letters.keys():
             letters[key] = key   
             word = '{0} {1} {2} {0} {3} {4} {0} {4}'.format(letters["A"],letters["R"],letters["K"],letters["N"],letters["S"])
-            if countMistakes == -1:
-              countMistakes = 7       
+                 
         else:
           result = "You lost!"
-          countMistakes = 6
-
+          countMistakes = 7
 
       else:
+          #Verifies if the first characther sent is in the secretWord string.
           if secretWord.find(capitalizedSentence[0]) == -1:
-            countMistakes = countMistakes + 1
-            print countMistakes
+              
+              if capitalizedSentence[0] not in guessedLetters:         
+                countMistakes = countMistakes + 1
+                guessedLetters.append(capitalizedSentence[0])
+                guessedLetters_msg = '-'.join(guessedLetters)
+             
+              else:
+                guessed_letter = True
+
+          #Change the dash for the right letter
           else:
             letters[capitalizedSentence] = capitalizedSentence
             word = '{0} {1} {2} {0} {3} {4} {0} {4}'.format(letters["A"],letters["R"],letters["K"],letters["N"],letters["S"])
 
+          #Verifies if the user right all letters, and change the result
           if "_" not in letters.values():
             result = "You won!"
 
-          elif countMistakes == 6:
+          #If the user have guessed for seven times, he lost
+          elif countMistakes == 7:
             result = "You lost!"
           else:
             result = "Game continues"
 
-      message = '{0} \n{1} \n{2}'.format(hangWord[countMistakes], word, result)
+      #format the message to send to the client
+      if guessed_letter:
+        message = 'You already tried this letter!\nNumber of wrong guess: {0} \nSecret Word: {1} \nGuessed letters: {2} \n{3}'.format(hangWord[countMistakes], word, guessedLetters_msg ,result)
+      else:
+        message = 'Number of wrong guess: {0}\nSecret Word: {1} \nGuessed letters: {2} \n{3}'.format(hangWord[countMistakes], word, guessedLetters_msg ,result)
       
       # Send it into established connection
       connectionSocket.send(message)
   
   # Close connection to client but do not close welcome socket 
-
   connectionSocket.close()
-  hangWord = ["H", "HA", "HAN", "HANG", "HANGM", "HANGMA", "HANGMAN"];
+
+  #Overwrite the variables to start a new game
+  hangWord = [" ", "H", "HA", "HAN", "HANG", "HANGM", "HANGMA", "HANGMAN"];
+  guessedLetters = []
+  guessedLetters_msg = ''
+  guessed_letter = False
   letters = {"A": "_", "R": "_","K": "_","N": "_","S": "_"}
   word = '{0} {1} {2} {0} {3} {4} {0} {4}'.format(letters["A"],letters["R"],letters["K"],letters["N"],letters["S"])
-  countMistakes = -1
+  countMistakes = 0
   result = 'Game continues'
 
 serverSocket.close()

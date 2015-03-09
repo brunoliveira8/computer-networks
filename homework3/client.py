@@ -1,8 +1,18 @@
-''' client.py
-usage: python TCPClient.py HOSTNAMEorIP PORT
-Reads text from user, sends to server, and prints answer
-Modified by Dale R. Thompson, 2/10/15
-'''
+
+'''=============================================================================
+ |    File Name:  client.py
+ |
+ |       Author:  Tarcisio Bruno Carneiro Oliveira
+ |     Language:  Python 2.7
+ |   	 To Run:  python client.py
+ |
+ |        Class:  CSCE4753
+ |      Project:  HANGMAN
+ |   Assumption:  [any prerequisite or precondition that must be met]
+ | Date Created:  2-27-2015
+ |    
+ |
+ +==========================================================================='''
 
 import sys
 import time
@@ -16,8 +26,9 @@ from socket import *
 serverName = 'localhost'
 
 # Set port number by converting argument string to integer
-#serverPort = int(sys.argv[2])
-serverPort = 7081
+serverPort = 5555
+
+
 # Choose SOCK_STREAM, which is TCP
 clientSocket = socket(AF_INET, SOCK_STREAM)
 
@@ -25,6 +36,7 @@ clientSocket = socket(AF_INET, SOCK_STREAM)
 # Connect to server using hostname/IP and port
 clientSocket.connect((serverName, serverPort))
 
+print "Let's play HANGMAN!"
 
 
 while 1:
@@ -32,7 +44,7 @@ while 1:
 	time.sleep(0.05) #
 
 	# Get sentence from user
-	sentence = raw_input('Input lowercase sentence: ')
+	sentence = raw_input('Guess a letter: ')
 	while(len(sentence) == 0): 
 		print 'Type a valid characther'
 		sentence = raw_input('Input lowercase sentence: ')
@@ -44,8 +56,11 @@ while 1:
 	# Receive response from server via socket
 	modifiedSentence = clientSocket.recv(1024)
 
-	print 'From Server: ', modifiedSentence
+	print '\n------------------------------------------------------------------------'
+	print 'From Server: '
+	print modifiedSentence
 
+	#The client program runs until the server send You win or You lost.
 	if modifiedSentence.find('Game continues') == -1:
 		break
 
